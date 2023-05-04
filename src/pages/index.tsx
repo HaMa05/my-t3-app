@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
   const user = useUser();
+  const { data } = api.post.getAll.useQuery();
 
   return (
     <>
@@ -18,6 +19,9 @@ const Home: NextPage = () => {
         <div>
           {user.isSignedIn && <SignOutButton />}
           {!user.isSignedIn && <SignInButton />}
+        </div>
+        <div>
+          {data?.map(post => <div key={post.id}>{post.content}</div>)}
         </div>
       </main>
     </>
