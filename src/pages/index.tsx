@@ -20,6 +20,8 @@ const CreatePostWizard = () => {
         height={50}
         className="h-14 w-14 rounded-full"
         src={user.profileImageUrl}
+        blurDataURL='/images/default_avt.png'
+        placeholder="blur"
         alt="avatar"
       />
       <input
@@ -40,6 +42,8 @@ const PostView = (props: PostWithUser) => {
         width={50}
         height={50}
         src={author?.profileImageUrl}
+        blurDataURL='/images/default_avt.png'
+        placeholder="blur"
         alt="Avatar user"
         className="h-14 w-14 rounded-full"
       />
