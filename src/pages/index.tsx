@@ -8,6 +8,7 @@ import Image from "next/image";
 import { LoadingSpinner } from "~/components/Loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 
@@ -51,10 +52,10 @@ const CreatePostWizard = () => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
-          if( e.key === 'Enter') {
-            e.preventDefault()
-            handlePressInput()
-          } 
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handlePressInput();
+          }
         }}
         disabled={isPosting}
       />
@@ -82,11 +83,15 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex items-baseline gap-1 text-slate-300">
-          <span className="font-bold">@{author.username}</span>
+          <Link href={`/@${author.username}`}>
+            <span className="font-bold">@{author.username}</span>
+          </Link>
           <span>•</span>
-          <span className="text-sm font-thin">
-            {dayjs(post.createdAt).fromNow()}
-          </span>
+          <Link href={`/post/${post.id}`}>
+            <span className="text-sm font-thin">
+              {dayjs(post.createdAt).fromNow()}
+            </span>
+          </Link>
         </div>
         <span className="text-xl">{post.content}</span>
       </div>
