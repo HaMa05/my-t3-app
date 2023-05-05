@@ -7,6 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingSpinner } from "~/components/Loading";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -19,14 +20,18 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.post.getAll.invalidate();
-    }
+    },
+    onError: (error) => {
+      const message = error.data?.zodError?.fieldErrors?.content?.[0];
+      toast.error(message ?? "Failed to post! Please try again later");
+    },
   });
 
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
 
   const handlePressInput = () => {
-    mutate({content: input})
-  }
+    mutate({ content: input });
+  };
 
   if (!user) return null;
 
@@ -45,9 +50,20 @@ const CreatePostWizard = () => {
         placeholder="What's happening?"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if( e.key === 'Enter') {
+            e.preventDefault()
+            handlePressInput()
+          } 
+        }}
         disabled={isPosting}
       />
-      <button onClick={handlePressInput}>Post</button>
+
+      {input && (
+        <button onClick={handlePressInput} disabled={isPosting}>
+          Post
+        </button>
+      )}
     </div>
   );
 };
@@ -65,10 +81,12 @@ const PostView = (props: PostWithUser) => {
         className="h-14 w-14 rounded-full"
       />
       <div className="flex flex-col">
-        <div className="flex gap-1 text-slate-300 items-baseline">
+        <div className="flex items-baseline gap-1 text-slate-300">
           <span className="font-bold">@{author.username}</span>
           <span>•</span>
-          <span className="font-thin text-sm">{dayjs(post.createdAt).fromNow()}</span>
+          <span className="text-sm font-thin">
+            {dayjs(post.createdAt).fromNow()}
+          </span>
         </div>
         <span className="text-xl">{post.content}</span>
       </div>
