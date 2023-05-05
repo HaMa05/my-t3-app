@@ -6,11 +6,27 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingSpinner } from "~/components/Loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+
+  // Because post was cached before, so we only use context to call data
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.post.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.post.getAll.invalidate();
+    }
+  });
+
+  const [input, setInput] = useState<string>('');
+
+  const handlePressInput = () => {
+    mutate({content: input})
+  }
 
   if (!user) return null;
 
@@ -21,15 +37,17 @@ const CreatePostWizard = () => {
         height={50}
         className="h-14 w-14 rounded-full"
         src={user.profileImageUrl}
-        blurDataURL="/images/default_avt.png"
-        placeholder="blur"
         alt="avatar"
       />
       <input
         type="text"
         className="grow bg-transparent outline-none"
         placeholder="What's happening?"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={handlePressInput}>Post</button>
     </div>
   );
 };
@@ -43,15 +61,14 @@ const PostView = (props: PostWithUser) => {
         width={50}
         height={50}
         src={author?.profileImageUrl}
-        blurDataURL="/images/default_avt.png"
-        placeholder="blur"
         alt="Avatar user"
         className="h-14 w-14 rounded-full"
       />
       <div className="flex flex-col">
-        <div className="flex gap-1 text-slate-300">
+        <div className="flex gap-1 text-slate-300 items-baseline">
           <span className="font-bold">@{author.username}</span>
-          <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
+          <span>•</span>
+          <span className="font-thin text-sm">{dayjs(post.createdAt).fromNow()}</span>
         </div>
         <span className="text-xl">{post.content}</span>
       </div>
@@ -72,7 +89,7 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col">
-      {[...data]?.map((fullPost) => (
+      {data?.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>
